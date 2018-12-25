@@ -1,0 +1,2 @@
+logging.level.kroonprins.mocker: debug
+spring.profiles.active: ${activeProfile}

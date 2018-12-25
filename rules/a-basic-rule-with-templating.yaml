@@ -4,7 +4,7 @@ request:
   method: GET
 response:
   templatingEngine: mustache
-  contentType: text/plain
-  statusCode: 200
+  contentType: "{{req.query.contentType}}"
+  statusCode: "{{req.query.statusCode}}"
   body: |
-    received a header 'h' with value {{req.query.q1}} and response status code of {{res.statusCode}} is set
+    received a body: {{req.query.body}}
