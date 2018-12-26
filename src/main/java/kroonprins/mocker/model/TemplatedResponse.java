@@ -8,6 +8,8 @@ import org.springframework.http.MediaType;
 @Builder
 @Value
 public class TemplatedResponse {
+    private final TemplatedFixedLatency fixedLatency;
+    private final TemplatedRandomLatency randomLatency;
     private final HttpStatus statusCode;
     private final MediaType contentType;
     private final String body;

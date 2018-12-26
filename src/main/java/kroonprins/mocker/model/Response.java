@@ -11,6 +11,8 @@ import lombok.Value;
 @Value
 public class Response {
     private final TemplatingEngines templatingEngine;
+    private final FixedLatency fixedLatency;
+    private final RandomLatency randomLatency;
     private final String contentType;
     private final String statusCode;
     private final String body;

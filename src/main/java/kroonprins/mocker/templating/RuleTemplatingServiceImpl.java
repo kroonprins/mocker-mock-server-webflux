@@ -25,6 +25,8 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
         TemplatingEngines templatingEngine = rule.getResponse().getTemplatingEngine();
         log.debug("Templating with engine {}", templatingEngine);
 
+        Mono<FixedLatency> fixedLatency = templateFixedLatency(rule.getResponse().getFixedLatency(), templatingEngine, context);
+        Mono<RandomLatency> randomLatency = templateRandomLatency(rule.getResponse().getRandomLatency(), templatingEngine, context);
         Mono<String> statusCode = template(rule.getResponse().getStatusCode(), templatingEngine, context);
         Mono<String> contentType = template(rule.getResponse().getContentType(), templatingEngine, context);
         Mono<String> body = template(rule.getResponse().getBody(), templatingEngine, context);
@@ -32,7 +34,7 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
         return Mono.zip(templatedValues -> {
             log.debug("Templating done: {}", templatedValues);
             return createTemplatedRule(rule, templatedValues);
-        }, statusCode, contentType, body);
+        }, fixedLatency, randomLatency, statusCode, contentType, body);
     }
 
     private Mono<String> template(String toTemplate, TemplatingEngines templatingEngine, TemplatingContext context) {
@@ -46,18 +48,36 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
         }
     }
 
+    private Mono<FixedLatency> templateFixedLatency(FixedLatency fixedLatency, TemplatingEngines templatingEngine, TemplatingContext context) {
+        if(fixedLatency == null) {
+            return Mono.just(FixedLatency.empty());
+        }
+        return template(fixedLatency.getValue(), templatingEngine, context)
+                .map(value -> FixedLatency.builder().value(value).build());
+    }
+
+    private Mono<RandomLatency> templateRandomLatency(RandomLatency randomLatency, TemplatingEngines templatingEngine, TemplatingContext context) {
+        if(randomLatency == null) {
+            return Mono.just(RandomLatency.empty());
+        }
+        Mono<String> min = template(randomLatency.getMin(), templatingEngine, context);
+        Mono<String> max = template(randomLatency.getMax(), templatingEngine, context);
+        return Mono.zip(min, max, (templatedMin, templatedMax) -> RandomLatency.builder().min(templatedMin).max(templatedMax).build());
+    }
+
     private TemplatedRule createTemplatedRule(Rule rule, Object[] templatedValues) {
-        HttpStatus statusCode = HttpStatus.valueOf(Integer.parseInt(((String)templatedValues[0])));
-        MediaType contentType = MediaType.valueOf((String)templatedValues[1]);
-        String body = (String)templatedValues[2];
+        FixedLatency fixedLatency = (FixedLatency)templatedValues[0];
+        RandomLatency randomLatency = (RandomLatency)templatedValues[1];
+        HttpStatus statusCode = HttpStatus.valueOf(Integer.parseInt(((String)templatedValues[2])));
+        MediaType contentType = MediaType.valueOf((String)templatedValues[3]);
+        String body = (String)templatedValues[4];
 
         return TemplatedRule.builder()
                 .name(rule.getName())
-                .request(TemplatedRequest.builder()
-                        .method(rule.getRequest().getMethod())
-                        .path(rule.getRequest().getPath())
-                        .build())
+                .request(TemplatedRequest.from(rule.getRequest()))
                 .response(TemplatedResponse.builder()
+                        .fixedLatency(TemplatedFixedLatency.from(fixedLatency))
+                        .randomLatency(TemplatedRandomLatency.from(randomLatency))
                         .statusCode(statusCode)
                         .contentType(contentType)
                         .body(body)
