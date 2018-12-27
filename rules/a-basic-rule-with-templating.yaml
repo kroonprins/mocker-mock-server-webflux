@@ -4,12 +4,26 @@ request:
   method: GET
 response:
   templatingEngine: mustache
-#  fixedLatency:
-#    value: 1000
+  #  fixedLatency:
+  #    value: 1000
   randomLatency:
     min: "{{req.query.min}}"
     max: "{{req.query.max}}"
   contentType: "{{req.query.contentType}}"
   statusCode: "{{req.query.statusCode}}"
+  headers:
+  - name: X-header1
+    value: header1
+  - name: X-header2
+    value: "{{req.query.h2}}"
+  cookies:
+  - name: cookie1
+    value: value1
+    properties:
+      maxAge: 900
+  - name: cookie2
+    value: value2
+    properties:
+      httpOnly: true
   body: |
     received a body: {{req.query.body}}

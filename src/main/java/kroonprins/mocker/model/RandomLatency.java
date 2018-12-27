@@ -16,14 +16,4 @@ public class RandomLatency {
     public static class RandomLatencyBuilder {
 
     }
-
-    private static final RandomLatency EMPTY = new RandomLatency(null, null);
-
-    public static RandomLatency empty() {
-        return EMPTY;
-    }
-
-    public boolean isEmpty() {
-        return this == EMPTY;
-    }
 }

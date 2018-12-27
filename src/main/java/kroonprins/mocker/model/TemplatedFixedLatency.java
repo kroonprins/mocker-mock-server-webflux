@@ -9,7 +9,7 @@ public class TemplatedFixedLatency {
     private final long value;
 
     public static TemplatedFixedLatency from(FixedLatency fixedLatency) {
-        if(fixedLatency == null || fixedLatency.isEmpty()) {
+        if (fixedLatency == null) {
             return null;
         }
         return TemplatedFixedLatency.builder()

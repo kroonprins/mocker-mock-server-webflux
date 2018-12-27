@@ -15,14 +15,4 @@ public class FixedLatency {
     public static class FixedLatencyBuilder {
 
     }
-
-    private static final FixedLatency EMPTY = new FixedLatency(null);
-
-    public static FixedLatency empty() {
-        return EMPTY;
-    }
-
-    public boolean isEmpty() {
-        return this == EMPTY;
-    }
 }

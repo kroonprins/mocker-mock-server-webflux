@@ -11,7 +11,7 @@ public class TemplatedRandomLatency {
     private final long max;
 
     public static TemplatedRandomLatency from(RandomLatency randomLatency) {
-        if(randomLatency == null || randomLatency.isEmpty()) {
+        if (randomLatency == null) {
             return null;
         }
         return TemplatedRandomLatency.builder()

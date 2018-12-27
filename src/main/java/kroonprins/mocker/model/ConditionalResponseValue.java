@@ -2,17 +2,16 @@ package kroonprins.mocker.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
-import kroonprins.mocker.templating.TemplatingEngines;
 import lombok.Builder;
 import lombok.Value;
 
 import java.util.List;
 
-@JsonDeserialize(builder = Response.ResponseBuilder.class)
+@JsonDeserialize(builder = ConditionalResponseValue.ConditionalResponseValueBuilder.class)
 @Builder
 @Value
-public class Response {
-    private final TemplatingEngines templatingEngine;
+public class ConditionalResponseValue {
+    private final String condition;
     private final FixedLatency fixedLatency;
     private final RandomLatency randomLatency;
     private final String contentType;
@@ -22,7 +21,7 @@ public class Response {
     private final String body;
 
     @JsonPOJOBuilder(withPrefix = "")
-    public static class ResponseBuilder {
+    public static class ConditionalResponseValueBuilder {
 
     }
 }

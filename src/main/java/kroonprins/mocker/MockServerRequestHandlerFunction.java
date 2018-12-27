@@ -5,6 +5,9 @@ import kroonprins.mocker.model.TemplatedRule;
 import kroonprins.mocker.templating.RuleTemplatingService;
 import kroonprins.mocker.templating.TemplatingContext;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.server.HandlerFunction;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -13,6 +16,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
 import java.time.Duration;
+import java.util.function.Consumer;
 
 @Slf4j
 public class MockServerRequestHandlerFunction implements HandlerFunction<ServerResponse> {
@@ -47,7 +51,29 @@ public class MockServerRequestHandlerFunction implements HandlerFunction<ServerR
         return ServerResponse
                 .status(rule.getResponse().getStatusCode())
                 .contentType(rule.getResponse().getContentType())
+                .headers(createSetHeadersConsumer(rule))
+                .cookies(createSetCookiesConsumer(rule))
                 .body(BodyInserters.fromObject(rule.getResponse().getBody()));
+    }
+
+    private Consumer<HttpHeaders> createSetHeadersConsumer(TemplatedRule rule) {
+        return headers -> rule.getResponse().getHeaders().forEach(header -> headers.add(header.getName(), header.getValue()));
+    }
+
+    private Consumer<MultiValueMap<String, ResponseCookie>> createSetCookiesConsumer(TemplatedRule rule) {
+        return cookies ->
+                rule.getResponse().getCookies().forEach(cookie ->
+                        cookies.add(cookie.getName(),
+                                ResponseCookie.from(cookie.getName(), cookie.getValue())
+                                        .domain(cookie.getProperties().getDomain())
+                                        .httpOnly(cookie.getProperties().isHttpOnly())
+                                        .maxAge(cookie.getProperties().getMaxAge())
+                                        .path(cookie.getProperties().getPath())
+                                        .secure(cookie.getProperties().isSecure())
+                                        .sameSite(cookie.getProperties().getSameSite())
+                                        .build()
+                        )
+                );
     }
 
     private Mono applyLatency(Tuple2<Long, TemplatedRule> value) {
@@ -57,9 +83,9 @@ public class MockServerRequestHandlerFunction implements HandlerFunction<ServerR
         log.debug("Applying latency: elapsed[{}]", elapsed);
 
         long latency = 0;
-        if(rule.getResponse().getFixedLatency() != null) {
+        if (rule.getResponse().getFixedLatency() != null) {
             latency = rule.getResponse().getFixedLatency().getValue();
-        } else if(rule.getResponse().getRandomLatency() != null) {
+        } else if (rule.getResponse().getRandomLatency() != null) {
             latency = rule.getResponse().getRandomLatency().getValue();
         }
 
@@ -67,7 +93,7 @@ public class MockServerRequestHandlerFunction implements HandlerFunction<ServerR
         long remainingDelay = latency - elapsed;
         log.debug("Applying latency: delay[{}]", remainingDelay);
 
-        if(remainingDelay > 0) {
+        if (remainingDelay > 0) {
             return Mono.just(true).delayElement(Duration.ofMillis(remainingDelay));
         } else {
             return Mono.empty();

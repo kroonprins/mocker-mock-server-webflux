@@ -5,17 +5,16 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import lombok.Builder;
 import lombok.Value;
 
-@JsonDeserialize(builder = Rule.RuleBuilder.class)
+@JsonDeserialize(builder = Cookie.CookieBuilder.class)
 @Builder
 @Value
-public class Rule {
+public class Cookie {
     private final String name;
-    private final Request request;
-    private final Response response;
-    private final ConditionalResponse conditionalResponse;
+    private final String value;
+    private final CookieProperties properties;
 
     @JsonPOJOBuilder(withPrefix = "")
-    public static class RuleBuilder {
+    public static class CookieBuilder {
 
     }
 }
