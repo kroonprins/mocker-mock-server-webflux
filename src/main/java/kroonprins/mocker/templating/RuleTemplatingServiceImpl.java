@@ -32,10 +32,11 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
         Mono<Optional<Response>> response = templateResponse(rule.getResponse(), context);
         Mono<Optional<ConditionalResponseValue>> conditionalResponseValue = templateConditionalResponse(rule.getConditionalResponse(), context);
 
-        return Mono.zip(templatedValues -> {
-            log.debug("Templating done: {}", templatedValues);
-            return createTemplatedRule(rule, templatedValues);
-        }, response, conditionalResponseValue);
+        return Mono.zip(response, conditionalResponseValue)
+                .map(templatedValues -> {
+                    log.debug("Templating done: {}", templatedValues);
+                    return createTemplatedRule(rule, templatedValues);
+                });
     }
 
     private Mono<Optional<String>> template(String toTemplate, TemplatingEngines templatingEngine, TemplatingContext context) {
@@ -115,17 +116,17 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
         Mono<List<Cookie>> cookies = templateCookies(conditionalResponseValue.getCookies(), templatingEngine, context);
         Mono<Optional<String>> body = template(conditionalResponseValue.getBody(), templatingEngine, context);
 
-        return Mono.zip(templatedValues ->
+        return Mono.zip(fixedLatency, randomLatency, statusCode, contentType, headers, cookies, body)
+                .map(templatedValues ->
                         ConditionalResponseValue.builder()
-                                .fixedLatency(((Optional<FixedLatency>) templatedValues[0]).orElse(null))
-                                .randomLatency(((Optional<RandomLatency>) templatedValues[1]).orElse(null))
-                                .statusCode(((Optional<String>) templatedValues[2]).get())
-                                .contentType(((Optional<String>) templatedValues[3]).orElse(null))
-                                .headers((List<Header>) templatedValues[4])
-                                .cookies((List<Cookie>) templatedValues[5])
-                                .body(((Optional<String>) templatedValues[6]).orElse(null))
-                                .build()
-                , fixedLatency, randomLatency, statusCode, contentType, headers, cookies, body);
+                                .fixedLatency(templatedValues.getT1().orElse(null))
+                                .randomLatency(templatedValues.getT2().orElse(null))
+                                .statusCode(templatedValues.getT3().get())
+                                .contentType(templatedValues.getT4().orElse(null))
+                                .headers(templatedValues.getT5())
+                                .cookies(templatedValues.getT6())
+                                .body(templatedValues.getT7().orElse(null))
+                                .build());
 
     }
 
@@ -213,24 +214,25 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
         Mono<Optional<String>> secure = template(cookieProperties.getSecure(), templatingEngine, context);
         Mono<Optional<String>> sameSite = template(cookieProperties.getSameSite(), templatingEngine, context);
 
-        return Mono.zip(templatedValues ->
+        return Mono.zip(domain, httpOnly, maxAge, path, secure, sameSite)
+                .map(templatedValues ->
                         Optional.of(
                                 CookieProperties.builder()
-                                        .domain(((Optional<String>) templatedValues[0]).orElse(null))
-                                        .httpOnly(((Optional<String>) templatedValues[1]).orElse(null))
-                                        .maxAge(((Optional<String>) templatedValues[2]).orElse(null))
-                                        .path(((Optional<String>) templatedValues[3]).orElse(null))
-                                        .secure(((Optional<String>) templatedValues[4]).orElse(null))
-                                        .sameSite(((Optional<String>) templatedValues[5]).orElse(null))
+                                        .domain(templatedValues.getT1().orElse(null))
+                                        .httpOnly(templatedValues.getT2().orElse(null))
+                                        .maxAge(templatedValues.getT3().orElse(null))
+                                        .path(templatedValues.getT4().orElse(null))
+                                        .secure(templatedValues.getT5().orElse(null))
+                                        .sameSite(templatedValues.getT6().orElse(null))
                                         .build()
                         )
-                , domain, httpOnly, maxAge, path, secure, sameSite);
+                );
     }
 
-    private TemplatedRule createTemplatedRule(Rule rule, Object[] templatedValues) {
-        TemplatedResponse templatedResponse = ((Optional<Response>) templatedValues[0])
+    private TemplatedRule createTemplatedRule(Rule rule, Tuple2<Optional<Response>, Optional<ConditionalResponseValue>> templatedValues) {
+        TemplatedResponse templatedResponse = templatedValues.getT1()
                 .map(TemplatedResponse::from)
-                .orElseGet(() -> TemplatedResponse.from(((Optional<ConditionalResponseValue>) templatedValues[1]).get()));
+                .orElseGet(() -> TemplatedResponse.from(templatedValues.getT2().get()));
 
         return TemplatedRule.builder()
                 .name(rule.getName())
