@@ -11,7 +11,7 @@ import java.util.List;
 @JsonDeserialize(builder = Response.ResponseBuilder.class)
 @Builder
 @Value
-public class Response {
+public class Response implements TemplatableResponse {
     private final TemplatingEngines templatingEngine;
     private final FixedLatency fixedLatency;
     private final RandomLatency randomLatency;

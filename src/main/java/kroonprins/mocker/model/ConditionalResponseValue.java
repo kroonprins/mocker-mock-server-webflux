@@ -10,7 +10,7 @@ import java.util.List;
 @JsonDeserialize(builder = ConditionalResponseValue.ConditionalResponseValueBuilder.class)
 @Builder
 @Value
-public class ConditionalResponseValue {
+public class ConditionalResponseValue implements TemplatableResponse {
     private final String condition;
     private final FixedLatency fixedLatency;
     private final RandomLatency randomLatency;
