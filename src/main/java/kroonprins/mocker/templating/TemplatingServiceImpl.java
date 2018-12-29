@@ -11,7 +11,7 @@ public class TemplatingServiceImpl implements TemplatingService {
 
     private Map<TemplatingEngines, TemplatingEngine<TemplatingContext>> mapping;
 
-    public TemplatingServiceImpl(List<TemplatingEngine<TemplatingContext>> templatingEngines) {
+    public TemplatingServiceImpl(List<TemplatingEngine> templatingEngines) {
         this.mapping = templatingEngines.stream()
                 .collect(Collectors.toMap(
                         TemplatingEngine::forType,

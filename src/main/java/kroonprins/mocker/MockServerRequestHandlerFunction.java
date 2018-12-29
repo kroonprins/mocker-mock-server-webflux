@@ -32,7 +32,7 @@ public class MockServerRequestHandlerFunction implements HandlerFunction<ServerR
     @Override
     public Mono<ServerResponse> handle(ServerRequest serverRequest) {
         return Mono.just(serverRequest)
-                .map(this::createTemplatingContext)
+                .flatMap(this::createTemplatingContext)
                 .flatMap(templatingContext -> ruleTemplatingService.template(rule, templatingContext))
                 .elapsed()
                 .delayUntil(this::applyLatency)
@@ -41,7 +41,7 @@ public class MockServerRequestHandlerFunction implements HandlerFunction<ServerR
                 .doOnError(error -> log.error("An unexpected error occurred", error));
     }
 
-    private TemplatingContext createTemplatingContext(ServerRequest serverRequest) {
+    private Mono<TemplatingContext> createTemplatingContext(ServerRequest serverRequest) {
         return TemplatingContext.fromServerRequest(serverRequest, rule.getTemplatingEngine());
     }
 

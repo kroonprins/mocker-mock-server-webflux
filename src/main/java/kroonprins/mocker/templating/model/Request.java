@@ -10,10 +10,11 @@ import java.util.Map;
 @Value
 public class Request {
     private final String path;
+    private final String originalUrl;
     private final HttpMethod method;
     private final Map<String, String> params;
     private final Map<String, String> query;
     private final Map<String, String> headers;
     private final Map<String, String> cookies;
-    private final String body;
+    private final Object body;
 }

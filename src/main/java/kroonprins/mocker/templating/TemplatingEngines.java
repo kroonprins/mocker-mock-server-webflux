@@ -3,24 +3,25 @@ package kroonprins.mocker.templating;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import kroonprins.mocker.templating.jinjava.JinjavaTemplatingContext;
 import org.springframework.web.reactive.function.server.ServerRequest;
+import reactor.core.publisher.Mono;
 
 import java.util.function.Function;
 
 public enum TemplatingEngines {
 
-    NONE(serverRequest -> EmptyTemplatingContext.CONTEXT),
+    NONE(serverRequest -> Mono.just(EmptyTemplatingContext.CONTEXT)),
 
     MUSTACHE(DefaultTemplatingContext::fromServerRequest),
 
     JINJAVA(JinjavaTemplatingContext::fromServerRequest);
 
-    private final Function<ServerRequest, TemplatingContext> templatingContextCreator;
+    private final Function<ServerRequest, Mono<TemplatingContext>> templatingContextCreator;
 
-    TemplatingEngines(Function<ServerRequest, TemplatingContext> templatingContextCreator) {
+    TemplatingEngines(Function<ServerRequest, Mono<TemplatingContext>> templatingContextCreator) {
         this.templatingContextCreator = templatingContextCreator;
     }
 
-    public TemplatingContext createTemplatingContext(ServerRequest serverRequest) {
+    public Mono<TemplatingContext> createTemplatingContext(ServerRequest serverRequest) {
         return this.templatingContextCreator.apply(serverRequest);
     }
 

@@ -35,6 +35,11 @@ public class JinjavaEchoFunction extends AbstractJinjavaFunction {
                 EchoResponse.builder()
                         .method((HttpMethod) request.get("method")) // TODO meh
                         .path((String) request.get("path"))
+                        .fullPath((String) request.get("originalUrl"))
+                        .body(request.get("body"))
+                        .params((Map<String, String>) request.get("query"))
+                        .headers((Map<String, String>) request.get("headers"))
+                        .cookies((Map<String, String>) request.get("cookies"))
                         .build()
         );
     }
@@ -44,5 +49,10 @@ public class JinjavaEchoFunction extends AbstractJinjavaFunction {
     public static class EchoResponse {
         private final HttpMethod method;
         private final String path;
+        private final String fullPath;
+        private final Object body;
+        private final Map<String, String> params;
+        private final Map<String, String> headers;
+        private final Map<String, String> cookies;
     }
 }
