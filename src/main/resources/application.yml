@@ -1,2 +1,2 @@
-logging.level.kroonprins.mocker: debug
+logging.level.kroonprins.mocker: info
 spring.profiles.active: ${activeProfile}

@@ -1,6 +1,7 @@
 package kroonprins.mocker.templating;
 
-public interface TemplatingEngine {
-    String render (String template, TemplatingContext context);
+public interface TemplatingEngine<T> {
+    String render(String template, T context);
+
     TemplatingEngines forType();
 }

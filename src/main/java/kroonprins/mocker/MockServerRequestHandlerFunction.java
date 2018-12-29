@@ -42,7 +42,7 @@ public class MockServerRequestHandlerFunction implements HandlerFunction<ServerR
     }
 
     private TemplatingContext createTemplatingContext(ServerRequest serverRequest) {
-        return TemplatingContext.fromServerRequest(serverRequest);
+        return TemplatingContext.fromServerRequest(serverRequest, rule.getTemplatingEngine());
     }
 
     private Mono<ServerResponse> createResponse(TemplatedRule rule) {

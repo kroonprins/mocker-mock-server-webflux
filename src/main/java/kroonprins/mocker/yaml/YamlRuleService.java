@@ -27,10 +27,10 @@ public class YamlRuleService implements RuleService {
     public Flux<Rule> produceRules() {
         return Flux.fromStream(
                 Glob.apply("rules", "*.yaml").stream()
-                    .map(this::readFile)
-                    .flatMap(Optional::stream)
-                    .map(this::fromString)
-                    .flatMap(Optional::stream)
+                        .map(this::readFile)
+                        .flatMap(Optional::stream)
+                        .map(this::fromString)
+                        .flatMap(Optional::stream)
         );
     }
 
@@ -38,7 +38,7 @@ public class YamlRuleService implements RuleService {
         try {
             return Optional.of(Files.readString(path));
         } catch (IOException exc) {
-//            log.warn("Error reading file %s", path, exc);
+            log.warn("Error reading file %s", path, exc);
             return Optional.empty();
         }
     }
@@ -47,7 +47,7 @@ public class YamlRuleService implements RuleService {
         try {
             return Optional.of(yaml.readValue(yamlRuleAsString, Rule.class));
         } catch (IOException exc) {
-//            log.warn("Error reading rule ", exc);
+            log.warn("Error reading rule {}", yamlRuleAsString, exc);
             return Optional.empty();
         }
     }

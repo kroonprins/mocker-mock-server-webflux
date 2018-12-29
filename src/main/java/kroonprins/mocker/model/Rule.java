@@ -2,6 +2,7 @@ package kroonprins.mocker.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import kroonprins.mocker.templating.TemplatingEngines;
 import lombok.Builder;
 import lombok.Value;
 
@@ -17,5 +18,13 @@ public class Rule {
     @JsonPOJOBuilder(withPrefix = "")
     public static class RuleBuilder {
 
+    }
+
+    public TemplatingEngines getTemplatingEngine() {
+        if (response != null) {
+            return response.getTemplatingEngine();
+        } else {
+            return conditionalResponse.getTemplatingEngine();
+        }
     }
 }

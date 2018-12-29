@@ -63,19 +63,19 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
         Mono<List<Cookie>> cookies = templateCookies(response.getCookies(), templatingEngine, context);
         Mono<Optional<String>> body = template(response.getBody(), templatingEngine, context);
 
-        return Mono.zip(templatedValues ->
+        return Mono.zip(fixedLatency, randomLatency, statusCode, contentType, headers, cookies, body)
+                .map(templatedValues ->
                         Optional.of(
                                 Response.builder()
-                                        .fixedLatency(((Optional<FixedLatency>) templatedValues[0]).orElse(null))
-                                        .randomLatency(((Optional<RandomLatency>) templatedValues[1]).orElse(null))
-                                        .statusCode(((Optional<String>) templatedValues[2]).get())
-                                        .contentType(((Optional<String>) templatedValues[3]).orElse(null))
-                                        .headers((List<Header>) templatedValues[4])
-                                        .cookies((List<Cookie>) templatedValues[5])
-                                        .body(((Optional<String>) templatedValues[6]).orElse(null))
+                                        .fixedLatency(templatedValues.getT1().orElse(null))
+                                        .randomLatency(templatedValues.getT2().orElse(null))
+                                        .statusCode(templatedValues.getT3().get())
+                                        .contentType(templatedValues.getT4().orElse(null))
+                                        .headers(templatedValues.getT5())
+                                        .cookies(templatedValues.getT6())
+                                        .body(templatedValues.getT7().orElse(null))
                                         .build()
-                        )
-                , fixedLatency, randomLatency, statusCode, contentType, headers, cookies, body);
+                        ));
     }
 
     private Mono<Optional<ConditionalResponseValue>> templateConditionalResponse(ConditionalResponse conditionalResponse, TemplatingContext context) {
