@@ -48,12 +48,16 @@ public class MockServerRequestHandlerFunction implements HandlerFunction<ServerR
     private Mono<ServerResponse> createResponse(TemplatedRule rule) {
         log.debug("Templated rule: {}", rule);
 
-        return ServerResponse
+        ServerResponse.BodyBuilder responseBuilder = ServerResponse
                 .status(rule.getResponse().getStatusCode())
                 .contentType(rule.getResponse().getContentType())
                 .headers(createSetHeadersConsumer(rule))
-                .cookies(createSetCookiesConsumer(rule))
-                .body(BodyInserters.fromObject(rule.getResponse().getBody()));
+                .cookies(createSetCookiesConsumer(rule));
+        if (rule.getResponse().getBody() != null) {
+            return responseBuilder.body(BodyInserters.fromObject(rule.getResponse().getBody()));
+        } else {
+            return responseBuilder.build();
+        }
     }
 
     private Consumer<HttpHeaders> createSetHeadersConsumer(TemplatedRule rule) {

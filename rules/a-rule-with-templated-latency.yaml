@@ -3,7 +3,7 @@ request:
   path: /templated-latency
   method: GET
 response:
-  templatingEngine: nunjucks
+  templatingEngine: jinjava
   contentType: text/plain
   statusCode: 200
   fixedLatency:

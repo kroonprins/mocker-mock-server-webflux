@@ -3,24 +3,19 @@ package kroonprins.mocker;
 import kroonprins.mocker.model.Request;
 import kroonprins.mocker.model.Rule;
 import kroonprins.mocker.templating.RuleTemplatingService;
-import kroonprins.mocker.templating.TemplatingService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.server.ServerResponse;
-import org.springframework.web.reactive.function.server.RouterFunction;
-import org.springframework.web.reactive.function.server.RouterFunctions;
-import org.springframework.web.reactive.function.server.RequestPredicate;
-import org.springframework.web.reactive.function.server.RequestPredicates;
+import org.springframework.web.reactive.function.server.*;
 
 import static org.springframework.web.reactive.function.server.RouterFunctions.route;
 
 @Configuration
-public class RouteBuilder {
+public class RoutesBuilder {
 
     private RuleService ruleService;
     private RuleTemplatingService ruleTemplatingService;
 
-    public RouteBuilder(RuleService ruleService, RuleTemplatingService ruleTemplatingService) {
+    public RoutesBuilder(RuleService ruleService, RuleTemplatingService ruleTemplatingService) {
         this.ruleService = ruleService;
         this.ruleTemplatingService = ruleTemplatingService;
     }

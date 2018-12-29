@@ -97,7 +97,6 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
                 .filter(Tuple3::getT1)
                 .collectList()
                 .map(list -> {
-                    log.error("list: {}", list);
                     if (list.size() > 1) {
                         list.sort(Comparator.comparing(Tuple3::getT3));
                     }
@@ -121,8 +120,8 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
                         ConditionalResponseValue.builder()
                                 .fixedLatency(templatedValues.getT1().orElse(null))
                                 .randomLatency(templatedValues.getT2().orElse(null))
-                                .statusCode(templatedValues.getT3().get())
-                                .contentType(templatedValues.getT4().orElse(null))
+                                .statusCode(templatedValues.getT3().map(String::trim).get())
+                                .contentType(templatedValues.getT4().map(String::trim).orElse(null))
                                 .headers(templatedValues.getT5())
                                 .cookies(templatedValues.getT6())
                                 .body(templatedValues.getT7().orElse(null))
@@ -138,7 +137,7 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
         return template(fixedLatency.getValue(), templatingEngine, context)
                 .map(value -> Optional.of(
                         FixedLatency.builder()
-                                .value(value.get())
+                                .value(value.map(String::trim).get())
                                 .build()
                         )
                 );
@@ -155,8 +154,8 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
         return Mono.zip(min, max, (templatedMin, templatedMax) ->
                 Optional.of(
                         RandomLatency.builder()
-                                .min(templatedMin.orElse(null))
-                                .max(templatedMax.get())
+                                .min(templatedMin.map(String::trim).orElse(null))
+                                .max(templatedMax.map(String::trim).get())
                                 .build()
                 )
         );
@@ -174,8 +173,8 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
                 .flatMap(value -> template(value, templatingEngine, context));
         return names.zipWith(values)
                 .map(zipped -> Header.builder()
-                        .name(zipped.getT1().get())
-                        .value(zipped.getT2().orElse(null))
+                        .name(zipped.getT1().map(String::trim).get())
+                        .value(zipped.getT2().map(String::trim).orElse(null))
                         .build())
                 .collectList();
     }
@@ -195,8 +194,8 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
                 .flatMap(cookieProperties -> templateCookieProperties(cookieProperties, templatingEngine, context));
         return Flux.zip(names, values, cookiePropertiesFlux)
                 .map(zipped -> Cookie.builder()
-                        .name(zipped.getT1().get())
-                        .value(zipped.getT2().orElse(null))
+                        .name(zipped.getT1().map(String::trim).get())
+                        .value(zipped.getT2().map(String::trim).orElse(null))
                         .properties(zipped.getT3().orElse(null))
                         .build())
                 .collectList();
@@ -218,12 +217,12 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
                 .map(templatedValues ->
                         Optional.of(
                                 CookieProperties.builder()
-                                        .domain(templatedValues.getT1().orElse(null))
-                                        .httpOnly(templatedValues.getT2().orElse(null))
-                                        .maxAge(templatedValues.getT3().orElse(null))
-                                        .path(templatedValues.getT4().orElse(null))
-                                        .secure(templatedValues.getT5().orElse(null))
-                                        .sameSite(templatedValues.getT6().orElse(null))
+                                        .domain(templatedValues.getT1().map(String::trim).orElse(null))
+                                        .httpOnly(templatedValues.getT2().map(String::trim).orElse(null))
+                                        .maxAge(templatedValues.getT3().map(String::trim).orElse(null))
+                                        .path(templatedValues.getT4().map(String::trim).orElse(null))
+                                        .secure(templatedValues.getT5().map(String::trim).orElse(null))
+                                        .sameSite(templatedValues.getT6().map(String::trim).orElse(null))
                                         .build()
                         )
                 );
