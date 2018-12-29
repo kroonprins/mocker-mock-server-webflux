@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 public enum TemplatingEngines {
 
-    NONE(serverRequest -> null),
+    NONE(serverRequest -> EmptyTemplatingContext.CONTEXT),
 
     MUSTACHE(DefaultTemplatingContext::fromServerRequest),
 

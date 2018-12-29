@@ -20,6 +20,7 @@ public class JinjavaTemplatingContext extends HashMap<String, Object> implements
         Map<String, Object> request = new HashMap<>();
         request.put("path", serverRequest.path());
         request.put("method", serverRequest.method());
+        request.put("params", serverRequest.pathVariables());
         request.put("query", serverRequest.queryParams().toSingleValueMap()); // TODO toSingleValueMap means possibly losing data
         return request;
     }

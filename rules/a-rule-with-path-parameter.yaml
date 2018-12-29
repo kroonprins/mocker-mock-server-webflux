@@ -1,9 +1,9 @@
 name: with path parameters
 request:
-  path: /path-parameter/:p1/:p2
+  path: /path-parameter/{p1}/{p2}
   method: GET
 response:
-  templatingEngine: nunjucks
+  templatingEngine: jinjava
   contentType: text/plain
   statusCode: 200
   body: |

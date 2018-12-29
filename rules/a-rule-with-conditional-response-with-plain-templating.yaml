@@ -4,7 +4,7 @@ request:
   path: /conditional-without-using-conditionalresponse
   method: GET
 response:
-  templatingEngine: nunjucks
+  templatingEngine: jinjava
   contentType: "{% if req.query.id == 'id1' or req.query.id == 'id2' %}application/json{% else %}text/plain{% endif %}"
   statusCode: "{% if req.query.id == 'id1' or req.query.id == 'id2' %}200{% else %}404{% endif %}"
   body: |

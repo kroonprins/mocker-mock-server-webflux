@@ -19,6 +19,7 @@ public class DefaultTemplatingContext implements TemplatingContext {
                         Request.builder()
                                 .path(serverRequest.path())
                                 .method(serverRequest.method())
+                                .params(serverRequest.pathVariables())
                                 .query(serverRequest.queryParams().toSingleValueMap()) // TODO toSingleValueMap means possibly losing data
                                 .build()
                 )

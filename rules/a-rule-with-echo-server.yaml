@@ -3,7 +3,7 @@ request:
   path: /echo
   method: POST
 response:
-  templatingEngine: nunjucks
+  templatingEngine: jinjava
   contentType: application/json
   statusCode: 200
   body: |

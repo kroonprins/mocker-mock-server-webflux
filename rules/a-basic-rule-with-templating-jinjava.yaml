@@ -6,9 +6,9 @@ response:
   templatingEngine: jinjava
   #  fixedLatency:
   #    value: 1000
-  randomLatency:
-    min: "{{req.query.min}}"
-    max: "{{req.query.max}}"
+#  randomLatency:
+  #    min: "{{req.query.min}}"
+  #    max: "{{req.query.max}}"
   contentType: "{{req.query.contentType}}"
   statusCode: "{{req.query.statusCode}}"
   headers:

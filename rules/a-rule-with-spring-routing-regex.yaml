@@ -1,6 +1,6 @@
 name: path using express routing regex
 request:
-  path: /regex/ab(cd)?e
+  path: /regex/ab*e
   method: GET
 response:
   templatingEngine: none
