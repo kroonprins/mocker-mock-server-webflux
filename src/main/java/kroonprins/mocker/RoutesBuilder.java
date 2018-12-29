@@ -24,9 +24,9 @@ public class RoutesBuilder {
     RouterFunction<ServerResponse> routes() {
         RouterFunctions.Builder result = route();
 
-        ruleService.produceRules().doOnNext(rule -> {
-            result.add(createRouterFunctionForRule(rule));
-        }).subscribe();
+        ruleService.produceRules().doOnNext(rule ->
+                result.add(createRouterFunctionForRule(rule))
+        ).subscribe();
 
         return result.build();
     }

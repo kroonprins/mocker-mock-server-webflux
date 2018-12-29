@@ -9,9 +9,9 @@ import java.util.stream.Collectors;
 @Service
 public class TemplatingServiceImpl implements TemplatingService {
 
-    private Map<TemplatingEngines, TemplatingEngine> mapping;
+    private Map<TemplatingEngines, TemplatingEngine<TemplatingContext>> mapping;
 
-    public TemplatingServiceImpl(List<TemplatingEngine> templatingEngines) {
+    public TemplatingServiceImpl(List<TemplatingEngine<TemplatingContext>> templatingEngines) {
         this.mapping = templatingEngines.stream()
                 .collect(Collectors.toMap(
                         TemplatingEngine::forType,
@@ -20,7 +20,7 @@ public class TemplatingServiceImpl implements TemplatingService {
     }
 
     @Override
-    public String render (TemplatingEngines engine, String template, TemplatingContext context) {
+    public String render(TemplatingEngines engine, String template, TemplatingContext context) {
         return this.mapping.getOrDefault(engine, this.mapping.get(TemplatingEngines.NONE)).render(template, context);
     }
 }
