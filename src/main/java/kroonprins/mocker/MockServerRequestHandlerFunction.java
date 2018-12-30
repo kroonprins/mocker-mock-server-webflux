@@ -1,5 +1,7 @@
 package kroonprins.mocker;
 
+import kroonprins.mocker.events.EventEmitter;
+import kroonprins.mocker.events.RequestReceivedEvent;
 import kroonprins.mocker.model.Rule;
 import kroonprins.mocker.model.TemplatedRule;
 import kroonprins.mocker.templating.RuleTemplatingService;
@@ -16,6 +18,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 
 import java.time.Duration;
+import java.util.Date;
 import java.util.function.Consumer;
 
 @Slf4j
@@ -23,15 +26,18 @@ public class MockServerRequestHandlerFunction implements HandlerFunction<ServerR
 
     private final Rule rule;
     private final RuleTemplatingService ruleTemplatingService;
+    private final EventEmitter eventEmitter;
 
-    public MockServerRequestHandlerFunction(Rule rule, RuleTemplatingService ruleTemplatingService) {
+    public MockServerRequestHandlerFunction(Rule rule, RuleTemplatingService ruleTemplatingService, EventEmitter eventEmitter) {
         this.rule = rule;
         this.ruleTemplatingService = ruleTemplatingService;
+        this.eventEmitter = eventEmitter;
     }
 
     @Override
     public Mono<ServerResponse> handle(ServerRequest serverRequest) {
         return Mono.just(serverRequest)
+                .doOnNext(this::createRequestReceivedEvent)
                 .flatMap(this::createTemplatingContext)
                 .flatMap(templatingContext -> ruleTemplatingService.template(rule, templatingContext))
                 .elapsed()
@@ -41,7 +47,17 @@ public class MockServerRequestHandlerFunction implements HandlerFunction<ServerR
                 .doOnError(error -> log.error("An unexpected error occurred", error));
     }
 
+    private void createRequestReceivedEvent(ServerRequest serverRequest) {
+        log.debug("Creating request received event for rule {}", rule);
+        this.eventEmitter.emit(RequestReceivedEvent.builder()
+                .timestamp(new Date())
+                .rule(rule)
+                .req(serverRequest)
+                .build());
+    }
+
     private Mono<TemplatingContext> createTemplatingContext(ServerRequest serverRequest) {
+        log.debug("Create templating context");
         return TemplatingContext.fromServerRequest(serverRequest, rule.getTemplatingEngine());
     }
 

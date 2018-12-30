@@ -1,2 +1,12 @@
 logging.level.kroonprins.mocker: info
 spring.profiles.active: ${activeProfile}
+
+management:
+  endpoint:
+    mappings.enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers,env,shutdown,mappings
+
+#mocker.metrics.enabled: false

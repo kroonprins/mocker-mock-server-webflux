@@ -1,4 +1,4 @@
 * test impact of moving subscribeOn(Schedulers.parallel()) to a higher level so that the work on parallel thread isn't so short
-* echo server, glob
-* metrics: custom built as in js version, but also see if something like micrometer can be used
+* glob
 * path parameters: would be nice if the express syntax also worked so that rules don't have to be modified between js version and this
+* reactor-logback

@@ -29,6 +29,7 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
 
     @Override
     public Mono<TemplatedRule> template(Rule rule, TemplatingContext context) {
+        log.debug("Start templating rule {}", rule);
         Mono<Optional<Response>> response = templateResponse(rule.getResponse(), context);
         Mono<Optional<ConditionalResponseValue>> conditionalResponseValue = templateConditionalResponse(rule.getConditionalResponse(), context);
 
