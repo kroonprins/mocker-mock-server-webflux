@@ -1,0 +1,29 @@
+---
+name: Conditional response with freemarker
+request:
+  path: /conditional-freemarker
+  method: GET
+conditionalResponse:
+  templatingEngine: freemarker
+  response:
+  - condition: "<#if req.query.id == 'id1'>true</#if>"
+    contentType: application/json
+    statusCode: 200
+    headers:
+    - name: X-id
+      value: id1
+    body: |
+      {
+        "data": "id1's data"
+      }
+  - condition: "<#if req.query.id == 'id2'>true</#if>"
+    contentType: application/json
+    statusCode: 206
+    body: |
+      {
+        "data": "id2's data"
+      }
+  - condition: true
+    contentType: text/plain
+    statusCode: 404
+    body: The item with id '${req.query.id}' does not exist

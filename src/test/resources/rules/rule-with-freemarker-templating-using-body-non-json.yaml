@@ -1,0 +1,10 @@
+name: rule with freemarker templating using input non-json body in templating
+request:
+  path: /templating-freemarker-non-json-input
+  method: POST
+response:
+  templatingEngine: freemarker
+  contentType: text/plain
+  statusCode: 200
+  body: |
+    received non-json body: ${req.body}

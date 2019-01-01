@@ -2,8 +2,8 @@
 * glob
 * path parameters: would be nice if the express syntax also worked so that rules don't have to be modified between js version and this
 * reactor-logback
-* add freemarker
 * body from file
 * try events by creating a publisher and then Flux.from(publisher)
 * error handling
 * docker (jib)
+* template caching

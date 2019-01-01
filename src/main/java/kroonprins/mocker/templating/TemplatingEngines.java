@@ -13,7 +13,9 @@ public enum TemplatingEngines {
 
     MUSTACHE(DefaultTemplatingContext::fromServerRequest),
 
-    JINJAVA(JinjavaTemplatingContext::fromServerRequest);
+    JINJAVA(JinjavaTemplatingContext::fromServerRequest),
+
+    FREEMARKER(DefaultTemplatingContext::fromServerRequest);
 
     private final Function<ServerRequest, Mono<TemplatingContext>> templatingContextCreator;
 
