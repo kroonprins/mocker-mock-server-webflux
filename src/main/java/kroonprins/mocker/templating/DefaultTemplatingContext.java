@@ -4,6 +4,7 @@ import kroonprins.mocker.templating.model.Request;
 import kroonprins.mocker.templating.model.Response;
 import lombok.Builder;
 import lombok.Value;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -26,11 +27,11 @@ public class DefaultTemplatingContext implements TemplatingContext {
                                 .req(
                                         Request.builder()
                                                 .path(serverRequest.path())
-                                                .originalUrl(serverRequest.uri().getRawPath() + "?" + serverRequest.uri().getRawQuery())
+                                                .originalUrl(serverRequest.uri().getRawPath() + (StringUtils.isNotBlank(serverRequest.uri().getRawQuery()) ? "?" + serverRequest.uri().getRawQuery() : ""))
                                                 .method(serverRequest.method())
                                                 .params(serverRequest.pathVariables())
                                                 .query(serverRequest.queryParams().toSingleValueMap()) // TODO toSingleValueMap means possibly losing data
-                                                .headers(serverRequest.headers().asHttpHeaders().toSingleValueMap().entrySet().stream().filter(header -> !"cookie".equals(header.getKey()))
+                                                .headers(serverRequest.headers().asHttpHeaders().toSingleValueMap().entrySet().stream().filter(header -> !"cookie" .equalsIgnoreCase(header.getKey()))
                                                         .collect(Collectors.toMap(
                                                                 Map.Entry::getKey,
                                                                 Map.Entry::getValue

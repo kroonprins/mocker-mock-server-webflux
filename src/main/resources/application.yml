@@ -1,5 +1,4 @@
 logging.level.kroonprins.mocker: info
-spring.profiles.active: ${activeProfile}
 
 management:
   endpoint:

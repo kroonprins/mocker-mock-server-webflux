@@ -1,0 +1,29 @@
+---
+name: Conditional response with mustache
+request:
+  path: /conditional-mustache
+  method: GET
+conditionalResponse:
+  templatingEngine: mustache
+  response:
+  - condition: "{{#req.query.id1}}true{{/req.query.id1}}"
+    contentType: application/json
+    statusCode: 200
+    headers:
+    - name: X-id
+      value: id1
+    body: |
+      {
+        "data": "id1's data"
+      }
+  - condition: "{{#req.query.id2}}true{{/req.query.id2}}"
+    contentType: application/json
+    statusCode: 206
+    body: |
+      {
+        "data": "id2's data"
+      }
+  - condition: true
+    contentType: text/plain
+    statusCode: 404
+    body: Not found

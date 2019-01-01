@@ -2,6 +2,7 @@ package kroonprins.mocker.model;
 
 import lombok.Builder;
 import lombok.Value;
+import org.apache.commons.lang3.StringUtils;
 
 @Builder
 @Value
@@ -17,7 +18,7 @@ public class TemplatedCookieProperties {
         return TemplatedCookieProperties.builder()
                 .domain(cookieProperties.getDomain())
                 .httpOnly(Boolean.valueOf(cookieProperties.getHttpOnly()))
-                .maxAge(cookieProperties.getMaxAge() != null ? Long.parseLong(cookieProperties.getMaxAge()) : -1L)
+                .maxAge(StringUtils.isNotBlank(cookieProperties.getMaxAge()) ? Long.parseLong(cookieProperties.getMaxAge()) : -1L)
                 .path(cookieProperties.getPath())
                 .secure(Boolean.valueOf(cookieProperties.getSecure()))
                 .sameSite(cookieProperties.getSameSite())

@@ -1,0 +1,29 @@
+---
+name: Conditional response with jinjava
+request:
+  path: /conditional-jinjava
+  method: GET
+conditionalResponse:
+  templatingEngine: jinjava
+  response:
+  - condition: "{{req.query.id == 'id1'}}"
+    contentType: application/json
+    statusCode: 200
+    headers:
+    - name: X-id
+      value: id1
+    body: |
+      {
+        "data": "id1's data"
+      }
+  - condition: "{{req.query.id == 'id2'}}"
+    contentType: application/json
+    statusCode: 206
+    body: |
+      {
+        "data": "id2's data"
+      }
+  - condition: true
+    contentType: text/plain
+    statusCode: 404
+    body: The item with id '{{req.query.id}}' does not exist

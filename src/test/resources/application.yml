@@ -1,0 +1,5 @@
+mocker:
+  rules:
+    base: src/test/resources/rules
+
+logging.level.kroonprins.mocker: debug

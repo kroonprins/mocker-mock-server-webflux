@@ -15,7 +15,7 @@ public class TemplatedRandomLatency {
             return null;
         }
         return TemplatedRandomLatency.builder()
-                .min(Long.parseLong(randomLatency.getMin()))
+                .min(randomLatency.getMin() != null ? Long.parseLong(randomLatency.getMin()) : 0)
                 .max(Long.parseLong(randomLatency.getMax()))
                 .build();
     }

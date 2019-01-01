@@ -1,0 +1,10 @@
+name: echo server using jinjava helper
+request:
+  path: /templating-jinjava-helper-echo
+  method: POST
+response:
+  templatingEngine: jinjava
+  contentType: application/json
+  statusCode: 200
+  body: |
+    {{echo(req)}}

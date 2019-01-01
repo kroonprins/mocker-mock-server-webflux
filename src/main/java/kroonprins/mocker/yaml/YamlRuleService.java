@@ -6,6 +6,7 @@ import kroonprins.mocker.RuleService;
 import kroonprins.mocker.model.Rule;
 import kroonprins.mocker.util.Glob;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -20,13 +21,20 @@ public class YamlRuleService implements RuleService {
     private final ObjectMapper yaml;
     // TODO Jackson2JsonDecoder works with Flux => can be used?
 
-    public YamlRuleService() {
+    private final String rulesBaseDir;
+    private final String rulesGlobPattern;
+
+    public YamlRuleService(
+            @Value("${mocker.rules.base:rules}") String rulesBaseDir,
+            @Value("${mocker.rules.glob:*.yaml}") String rulesGlobPattern) {
         this.yaml = new ObjectMapper(new YAMLFactory());
+        this.rulesBaseDir = rulesBaseDir;
+        this.rulesGlobPattern = rulesGlobPattern;
     }
 
     public Flux<Rule> produceRules() {
         return Flux.fromStream(
-                Glob.apply("rules", "*.yaml").stream()
+                Glob.apply(rulesBaseDir, rulesGlobPattern).stream()
                         .map(this::readFile)
                         .flatMap(Optional::stream)
                         .map(this::fromString)

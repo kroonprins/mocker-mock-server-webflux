@@ -1,0 +1,10 @@
+name: fixed latency
+request:
+  path: /fixed-latency-jinjava-templating
+  method: GET
+response:
+  templatingEngine: jinjava
+  contentType: text/plain
+  statusCode: 200
+  fixedLatency:
+    value: "{{req.query.value}}"

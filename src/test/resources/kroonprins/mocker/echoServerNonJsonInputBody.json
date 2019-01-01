@@ -1,0 +1,13 @@
+{
+  "method": "POST",
+  "path": "/templating-jinjava-helper-echo",
+  "fullPath": "/templating-jinjava-helper-echo",
+  "body": "<document><a>x</a><b><c>d</c><c>e</c></be></document>",
+  "params": {},
+  "headers": {
+    "WebTestClient-Request-Id": "${json-unit.any-string}",
+    "Content-Length": "53",
+    "Content-Type": "application/xml"
+  },
+  "cookies": {}
+}

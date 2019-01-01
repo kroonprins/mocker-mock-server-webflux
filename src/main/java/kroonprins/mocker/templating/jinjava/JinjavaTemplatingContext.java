@@ -1,6 +1,7 @@
 package kroonprins.mocker.templating.jinjava;
 
 import kroonprins.mocker.templating.TemplatingContext;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -28,11 +29,11 @@ public class JinjavaTemplatingContext extends HashMap<String, Object> implements
                 .map(body -> {
                     Map<String, Object> request = new HashMap<>();
                     request.put("path", serverRequest.path());
-                    request.put("originalUrl", serverRequest.uri().getRawPath() + "?" + serverRequest.uri().getRawQuery());
+                    request.put("originalUrl", serverRequest.uri().getRawPath() + (StringUtils.isNotBlank(serverRequest.uri().getRawQuery()) ? "?" + serverRequest.uri().getRawQuery() : ""));
                     request.put("method", serverRequest.method());
                     request.put("params", serverRequest.pathVariables());
                     request.put("query", serverRequest.queryParams().toSingleValueMap()); // TODO toSingleValueMap means possibly losing data
-                    request.put("headers", serverRequest.headers().asHttpHeaders().toSingleValueMap().entrySet().stream().filter(header -> !"cookie".equals(header.getKey()))
+                    request.put("headers", serverRequest.headers().asHttpHeaders().toSingleValueMap().entrySet().stream().filter(header -> !"cookie" .equalsIgnoreCase(header.getKey()))
                             .collect(Collectors.toMap(
                                     Entry::getKey,
                                     Entry::getValue

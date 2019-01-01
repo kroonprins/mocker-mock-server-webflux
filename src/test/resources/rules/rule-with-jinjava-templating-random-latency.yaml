@@ -1,0 +1,11 @@
+name: random latency with jinjava templating
+request:
+  path: /random-latency-jinjava-templating
+  method: GET
+response:
+  templatingEngine: jinjava
+  contentType: text/plain
+  statusCode: 200
+  randomLatency:
+    min: "{{req.query.min}}"
+    max: "{{req.query.max}}"

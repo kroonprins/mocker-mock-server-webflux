@@ -1,0 +1,24 @@
+name: rule with mustach templating
+request:
+  path: /templating-mustache/{p1}/{p2}
+  method: POST
+response:
+  templatingEngine: mustache
+  contentType: "{{req.query.contentType}}"
+  statusCode: "{{req.query.statusCode}}"
+  headers:
+  - name: X-header1
+    value: header1
+  - name: X-header2
+    value: "{{req.cookies.c1}}"
+  cookies:
+  - name: cookie1
+    value: value1
+    properties:
+      secure: "{{req.headers.x-secure}}"
+  - name: cookie2
+    value: value2
+    properties:
+      httpOnly: true
+  body: |
+    received json body with as value for property 'a': {{req.body.a}}, and second element in nested array: {{req.body.b.c.1}}. Path parameter p1: {{req.params.p1}}, parameter p2: {{req.params.p2}}.

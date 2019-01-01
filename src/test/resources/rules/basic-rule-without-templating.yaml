@@ -1,0 +1,9 @@
+name: basic rule rule without templating
+request:
+  path: /get-without-templating
+  method: GET
+response:
+  templatingEngine: none
+  contentType: text/plain
+  statusCode: 200
+  body: the response body {{req.path}}

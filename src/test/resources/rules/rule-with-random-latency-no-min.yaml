@@ -1,0 +1,10 @@
+name: random latency without min should default to min 0
+request:
+  path: /random-latency-no-min
+  method: GET
+response:
+  templatingEngine: none
+  contentType: text/plain
+  statusCode: 200
+  randomLatency:
+    max: 2000

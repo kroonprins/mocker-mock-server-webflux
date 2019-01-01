@@ -1,0 +1,10 @@
+name: rule with jinjava templating using input json body in templating
+request:
+  path: /templating-jinjava-json-input
+  method: POST
+response:
+  templatingEngine: jinjava
+  contentType: text/plain
+  statusCode: 200
+  body: |
+    received json body with as value for property 'a': {{req.body.a}}, and second element in nested array: {{req.body.b.c[1]}}

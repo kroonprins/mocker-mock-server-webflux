@@ -3,7 +3,6 @@ package kroonprins.mocker.templating;
 import kroonprins.mocker.model.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -19,7 +18,6 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-@Profile("with-threading")
 public class RuleTemplatingServiceImpl implements RuleTemplatingService {
     private TemplatingService templatingService;
 
@@ -44,10 +42,13 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
         if (TemplatingEngines.NONE.equals(templatingEngine) || StringUtils.isBlank(toTemplate)) {
             return Mono.just(Optional.ofNullable(toTemplate));
         } else {
-            return Mono.fromCallable(() -> {
-                log.debug("Templating with engine {}: {}", templatingEngine, toTemplate);
-                return Optional.of(templatingService.render(templatingEngine, toTemplate, context));
-            }).subscribeOn(Schedulers.parallel());
+            return Mono.fromCallable(
+                    () -> {
+                        log.debug("Templating with engine {}: {}", templatingEngine, toTemplate);
+                        return templatingService.render(templatingEngine, toTemplate, context);
+                    })
+                    .map(Optional::of)
+                    .subscribeOn(Schedulers.parallel());
         }
     }
 
@@ -66,17 +67,17 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
 
         return Mono.zip(fixedLatency, randomLatency, statusCode, contentType, headers, cookies, body)
                 .map(templatedValues ->
-                        Optional.of(
-                                Response.builder()
-                                        .fixedLatency(templatedValues.getT1().orElse(null))
-                                        .randomLatency(templatedValues.getT2().orElse(null))
-                                        .statusCode(templatedValues.getT3().get())
-                                        .contentType(templatedValues.getT4().orElse(null))
-                                        .headers(templatedValues.getT5())
-                                        .cookies(templatedValues.getT6())
-                                        .body(templatedValues.getT7().orElse(null))
-                                        .build()
-                        ));
+                        Response.builder()
+                                .fixedLatency(templatedValues.getT1().orElse(null))
+                                .randomLatency(templatedValues.getT2().orElse(null))
+                                .statusCode(templatedValues.getT3().get())
+                                .contentType(templatedValues.getT4().orElse(null))
+                                .headers(templatedValues.getT5())
+                                .cookies(templatedValues.getT6())
+                                .body(templatedValues.getT7().orElse(null))
+                                .build()
+                )
+                .map(Optional::of);
     }
 
     private Mono<Optional<ConditionalResponseValue>> templateConditionalResponse(ConditionalResponse conditionalResponse, TemplatingContext context) {
@@ -136,12 +137,11 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
         }
 
         return template(fixedLatency.getValue(), templatingEngine, context)
-                .map(value -> Optional.of(
-                        FixedLatency.builder()
-                                .value(value.map(String::trim).get())
-                                .build()
-                        )
-                );
+                .map(value -> FixedLatency.builder()
+                        .value(value.map(String::trim).get())
+                        .build()
+                )
+                .map(Optional::of);
     }
 
     private Mono<Optional<RandomLatency>> templateRandomLatency(RandomLatency randomLatency, TemplatingEngines templatingEngine, TemplatingContext context) {
@@ -153,53 +153,54 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
         Mono<Optional<String>> max = template(randomLatency.getMax(), templatingEngine, context);
 
         return Mono.zip(min, max, (templatedMin, templatedMax) ->
-                Optional.of(
-                        RandomLatency.builder()
-                                .min(templatedMin.map(String::trim).orElse(null))
-                                .max(templatedMax.map(String::trim).get())
-                                .build()
-                )
-        );
+                RandomLatency.builder()
+                        .min(templatedMin.map(String::trim).orElse(null))
+                        .max(templatedMax.map(String::trim).get())
+                        .build())
+                .map(Optional::of);
     }
 
     private Mono<List<Header>> templateHeaders(List<Header> headers, TemplatingEngines templatingEngine, TemplatingContext context) {
         if (headers == null) {
             return Mono.just(new ArrayList<>());
         }
-        Flux<Optional<String>> names = Flux.fromIterable(headers)
-                .map(Header::getName)
-                .flatMap(name -> template(name, templatingEngine, context));
-        Flux<Optional<String>> values = Flux.fromIterable(headers)
-                .map(Header::getValue)
-                .flatMap(value -> template(value, templatingEngine, context));
-        return names.zipWith(values)
-                .map(zipped -> Header.builder()
-                        .name(zipped.getT1().map(String::trim).get())
-                        .value(zipped.getT2().map(String::trim).orElse(null))
-                        .build())
+        return Flux.fromIterable(headers)
+                .flatMap(header -> templateHeader(header, templatingEngine, context))
                 .collectList();
+    }
+
+    private Mono<Header> templateHeader(Header header, TemplatingEngines templatingEngine, TemplatingContext context) {
+        Mono<Optional<String>> name = template(header.getName(), templatingEngine, context);
+        Mono<Optional<String>> value = template(header.getValue(), templatingEngine, context);
+
+        return Mono.zip(name, value, (templatedName, templatedValue) ->
+                Header.builder()
+                        .name(templatedName.map(String::trim).get())
+                        .value(templatedValue.map(String::trim).orElse(null))
+                        .build());
     }
 
     private Mono<List<Cookie>> templateCookies(List<Cookie> cookies, TemplatingEngines templatingEngine, TemplatingContext context) {
         if (cookies == null) {
             return Mono.just(new ArrayList<>());
         }
-        Flux<Optional<String>> names = Flux.fromIterable(cookies)
-                .map(Cookie::getName)
-                .flatMap(name -> template(name, templatingEngine, context));
-        Flux<Optional<String>> values = Flux.fromIterable(cookies)
-                .map(Cookie::getValue)
-                .flatMap(value -> template(value, templatingEngine, context));
-        Flux<Optional<CookieProperties>> cookiePropertiesFlux = Flux.fromIterable(cookies)
-                .map(Cookie::getProperties)
-                .flatMap(cookieProperties -> templateCookieProperties(cookieProperties, templatingEngine, context));
-        return Flux.zip(names, values, cookiePropertiesFlux)
-                .map(zipped -> Cookie.builder()
-                        .name(zipped.getT1().map(String::trim).get())
-                        .value(zipped.getT2().map(String::trim).orElse(null))
-                        .properties(zipped.getT3().orElse(null))
-                        .build())
+        return Flux.fromIterable(cookies)
+                .flatMap(cookie -> templateCookie(cookie, templatingEngine, context))
                 .collectList();
+    }
+
+    private Mono<Cookie> templateCookie(Cookie cookie, TemplatingEngines templatingEngine, TemplatingContext context) {
+        Mono<Optional<String>> name = template(cookie.getName(), templatingEngine, context);
+        Mono<Optional<String>> value = template(cookie.getValue(), templatingEngine, context);
+        Mono<Optional<CookieProperties>> cookieProperties = templateCookieProperties(cookie.getProperties(), templatingEngine, context);
+
+        return Mono.zip(name, value, cookieProperties)
+                .map(templatedValues ->
+                        Cookie.builder()
+                                .name(templatedValues.getT1().map(String::trim).get())
+                                .value(templatedValues.getT2().map(String::trim).orElse(null))
+                                .properties(templatedValues.getT3().orElse(null))
+                                .build());
     }
 
     private Mono<Optional<CookieProperties>> templateCookieProperties(CookieProperties cookieProperties, TemplatingEngines templatingEngine, TemplatingContext context) {
@@ -216,23 +217,29 @@ public class RuleTemplatingServiceImpl implements RuleTemplatingService {
 
         return Mono.zip(domain, httpOnly, maxAge, path, secure, sameSite)
                 .map(templatedValues ->
-                        Optional.of(
-                                CookieProperties.builder()
-                                        .domain(templatedValues.getT1().map(String::trim).orElse(null))
-                                        .httpOnly(templatedValues.getT2().map(String::trim).orElse(null))
-                                        .maxAge(templatedValues.getT3().map(String::trim).orElse(null))
-                                        .path(templatedValues.getT4().map(String::trim).orElse(null))
-                                        .secure(templatedValues.getT5().map(String::trim).orElse(null))
-                                        .sameSite(templatedValues.getT6().map(String::trim).orElse(null))
-                                        .build()
-                        )
-                );
+                        CookieProperties.builder()
+                                .domain(templatedValues.getT1().map(String::trim).orElse(null))
+                                .httpOnly(templatedValues.getT2().map(String::trim).orElse(null))
+                                .maxAge(templatedValues.getT3().map(String::trim).orElse(null))
+                                .path(templatedValues.getT4().map(String::trim).orElse(null))
+                                .secure(templatedValues.getT5().map(String::trim).orElse(null))
+                                .sameSite(templatedValues.getT6().map(String::trim).orElse(null))
+                                .build()
+
+                )
+                .map(Optional::of);
     }
 
     private TemplatedRule createTemplatedRule(Rule rule, Tuple2<Optional<Response>, Optional<ConditionalResponseValue>> templatedValues) {
-        TemplatedResponse templatedResponse = templatedValues.getT1()
-                .map(TemplatedResponse::from)
-                .orElseGet(() -> TemplatedResponse.from(templatedValues.getT2().get()));
+        TemplatedResponse templatedResponse =
+                templatedValues.getT1()
+                        .map(TemplatedResponse::from)
+                        .orElseGet(
+                                () ->
+                                        templatedValues.getT2()
+                                                .map(TemplatedResponse::from)
+                                                .orElseThrow()
+                        );
 
         return TemplatedRule.builder()
                 .name(rule.getName())

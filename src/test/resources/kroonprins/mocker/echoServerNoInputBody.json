@@ -1,0 +1,19 @@
+{
+  "method": "POST",
+  "path": "/templating-jinjava-helper-echo",
+  "fullPath": "/templating-jinjava-helper-echo?q1=query1&q2=query2",
+  "body": "",
+  "params": {
+    "q1": "query1",
+    "q2": "query2"
+  },
+  "headers": {
+    "WebTestClient-Request-Id": "${json-unit.any-string}",
+    "x-h2": "header2",
+    "x-h1": "header1"
+  },
+  "cookies": {
+    "c1": "cookie1",
+    "c2": "cookie2"
+  }
+}
