@@ -1,6 +1,10 @@
 /target/
 !.mvn/wrapper/maven-wrapper.jar
 
+.gradle
+/build/
+!gradle/wrapper/gradle-wrapper.jar
+
 ### STS ###
 .apt_generated
 .classpath
@@ -15,10 +19,10 @@
 *.iws
 *.iml
 *.ipr
+/out/
 
 ### NetBeans ###
 /nbproject/private/
-/build/
 /nbbuild/
 /dist/
 /nbdist/

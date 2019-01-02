@@ -8,3 +8,4 @@
 * docker (jib)
 * template caching
 * switch to gradle
+* add pmd/checkstyle/enforcer
