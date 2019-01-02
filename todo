@@ -7,3 +7,4 @@
 * error handling
 * docker (jib)
 * template caching
+* switch to gradle
